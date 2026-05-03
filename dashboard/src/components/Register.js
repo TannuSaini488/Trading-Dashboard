@@ -9,7 +9,6 @@ import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Alert from "@mui/material/Alert";
 import axios from "axios";
@@ -27,7 +26,7 @@ export default function Register() {
     if (user) {
       navigate("/");
     }
-  }, []);
+  }, [user, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -43,9 +42,9 @@ export default function Register() {
       setAlert({ st: true, msg: "Enter Valid Details" });
     }
 
+    const apiBaseUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
     axios
-      // .post("https://zerodha-clone-backend-8nlf.onrender.com/user/register", data, {
-      .post("https://zerodha-clone-backend-itcc.onrender.com/user/register", data, {
+      .post(`${apiBaseUrl}/user/register`, data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -83,7 +82,7 @@ export default function Register() {
             Register Now
           </Typography>
           <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-            {alert.st == true ? <Alert severity="error">{alert.msg}</Alert> : null}
+            {alert.st === true ? <Alert severity="error">{alert.msg}</Alert> : null}
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField autoComplete="given-name" name="Username" required fullWidth id="Username" label="Username" autoFocus />

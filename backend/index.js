@@ -13,8 +13,24 @@ const positionsRoute = require("./routes/positionsRoute");
 const userRoute = require("./routes/userRoute");
 const orderRoute = require("./routes/orderRoute");
 
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.DASHBOARD_URL,
+  'https://zerodha-clone-dashboard-cvhc.onrender.com',
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3005'
+].filter(Boolean);
+
 app.use(cors({
-  origin: 'https://zerodha-clone-dashboard-cvhc.onrender.com'
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
 app.use(bodyParser.json());
 
@@ -23,7 +39,45 @@ app.use("/positions", positionsRoute);
 app.use("/user", userRoute);
 app.use("/orders", orderRoute);
 
-app.listen(port, async () => {
+const server = require("http").createServer(app);
+const io = require("socket.io")(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"]
+  }
+});
+
+// Mock Price Updates
+const stocks = ["INFY", "ONGC", "TCS", "RELIANCE", "WIPRO", "HDFC"];
+setInterval(() => {
+  const stockUpdate = {
+    name: stocks[Math.floor(Math.random() * stocks.length)],
+    price: (Math.random() * 2000 + 100).toFixed(2),
+    percent: (Math.random() * 2 - 1).toFixed(2),
+    isDown: Math.random() > 0.5
+  };
+  io.emit("priceUpdate", stockUpdate);
+}, 2000);
+
+io.on("connection", (socket) => {
+  console.log("Client connected to WebSocket");
+  socket.on("disconnect", () => console.log("Client disconnected"));
+});
+
+server.listen(port, async () => {
   console.log(`App Is listening On ${port}`);
-  await mongoose.connect(url).then(() => console.log("Connected To DB"));
+  try {
+    await mongoose.connect(url);
+    console.log("✅ Connected To DB");
+  } catch (err) {
+    console.error("❌ DATABASE CONNECTION ERROR!");
+    console.error("--------------------------------------------------");
+    console.error("1. Please check if your IP is whitelisted on MongoDB Atlas.");
+    console.error("   Go to: https://cloud.mongodb.com/ -> Network Access -> Add IP.");
+    console.error("2. If you see 'ETIMEOUT', your internet provider might be blocking DNS.");
+    console.error("   Try adding 0.0.0.0/0 to the whitelist temporarily.");
+    console.error("--------------------------------------------------");
+    // Don't crash the server, but log the error
+    console.error(err.message);
+  }
 });

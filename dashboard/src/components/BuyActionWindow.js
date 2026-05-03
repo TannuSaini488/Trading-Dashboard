@@ -1,23 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
 import GeneralContext from "./GeneralContext";
 import "./BuyActionWindow.css";
-import { useAuth } from "../hooks/useAuth";
-
 const BuyActionWindow = ({ uid }) => {
   const [stockQuantity, setStockQuantity] = useState(1);
   const [stockPrice, setStockPrice] = useState(0.0);
-  const { user } = useAuth();
+  const generalContext = useContext(GeneralContext);
 
   const token = localStorage.getItem("token");
 
   const handleBuyClick = () => {
-    axios 
+    const apiBaseUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
+    axios
       .post(
-        // "https://zerodha-clone-backend-8nlf.onrender.com/orders/create",
-        "https://zerodha-clone-backend-itcc.onrender.com/orders/create",
+        `${apiBaseUrl}/orders/create`,
         {
           name: uid,
           qty: stockQuantity,
@@ -27,21 +25,21 @@ const BuyActionWindow = ({ uid }) => {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
         }
       )
       .then((res) => {
-        GeneralContext.closeBuyWindow();
+        generalContext.closeBuyWindow();
       })
       .catch((error) => {
-        GeneralContext.closeBuyWindow();
+        console.error("Order creation failed:", error);
+        generalContext.closeBuyWindow();
       });
-    GeneralContext.closeBuyWindow();
   };
 
   const handleCancelClick = () => {
-    GeneralContext.closeBuyWindow();
+    generalContext.closeBuyWindow();
   };
 
   return (

@@ -26,7 +26,7 @@ export default function Login() {
     if (user) {
       navigate("/");
     }
-  }, []);
+  }, [user, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -35,17 +35,13 @@ export default function Login() {
       email: formData.get("email"),
       password: formData.get("password"),
     };
+    const apiBaseUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
     axios
-      // .post("https://zerodha-clone-backend-8nlf.onrender.com/user/login", data, {
-      .post(
-        "https://zerodha-clone-backend-itcc.onrender.com/user/login",
-        data,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      .post(`${apiBaseUrl}/user/login`, data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
       .then(async (res) => {
         console.log("Token received from backend:", res.data);
         const token = res.data.token;
@@ -93,7 +89,7 @@ export default function Login() {
             noValidate
             sx={{ mt: 1 }}
           >
-            {alert.st == true ? (
+            {alert.st === true ? (
               <Alert severity="error">{alert.msg}</Alert>
             ) : null}
             <TextField

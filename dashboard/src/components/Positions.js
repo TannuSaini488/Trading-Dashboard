@@ -2,25 +2,23 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 import { VerticalGraph } from "./VerticalGraph";
-import { useAuth } from "../hooks/useAuth";
-
 const Positions = () => {
   let [allPositions, SetAllPositions] = useState([]);
-  let { user } = useAuth();
   const token = localStorage.getItem("token");
 
   useEffect(() => {
+    const apiBaseUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
     axios
-      // .get("https://zerodha-clone-backend-8nlf.onrender.com/positions/index", {
-      .get("https://zerodha-clone-backend-itcc.onrender.com/positions/index", {
+      .get(`${apiBaseUrl}/positions/index`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => {
         SetAllPositions(res.data);
-      });
-  }, []);
+      })
+      .catch((err) => console.error("Error fetching positions:", err));
+  }, [token]);
 
   const labels = allPositions.map((subArray) => subArray["name"]);
 

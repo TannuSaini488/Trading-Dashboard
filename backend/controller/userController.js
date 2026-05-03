@@ -25,9 +25,14 @@ module.exports.register = async (req, res) => {
     res.status(200).json({
       success: true,
       token,
-      user,
+      user: {
+        username: newUser.username,
+        email: newUser.email,
+        id: newUser._id,
+      },
     });
   } catch (error) {
+    console.error("Register error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
