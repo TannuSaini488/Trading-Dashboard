@@ -67,17 +67,14 @@ io.on("connection", (socket) => {
 server.listen(port, async () => {
   console.log(`App Is listening On ${port}`);
   try {
+    console.log("Attempting to connect to MongoDB...");
     await mongoose.connect(url);
     console.log("✅ Connected To DB");
   } catch (err) {
     console.error("❌ DATABASE CONNECTION ERROR!");
+    console.error("Error Code:", err.code);
+    console.error("Error Message:", err.message);
+    console.error("Full Error:", JSON.stringify(err, null, 2));
     console.error("--------------------------------------------------");
-    console.error("1. Please check if your IP is whitelisted on MongoDB Atlas.");
-    console.error("   Go to: https://cloud.mongodb.com/ -> Network Access -> Add IP.");
-    console.error("2. If you see 'ETIMEOUT', your internet provider might be blocking DNS.");
-    console.error("   Try adding 0.0.0.0/0 to the whitelist temporarily.");
-    console.error("--------------------------------------------------");
-    // Don't crash the server, but log the error
-    console.error(err.message);
   }
 });
