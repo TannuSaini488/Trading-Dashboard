@@ -1,0 +1,9 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: trading-backend
+    ports:
+      - "3002:3002"
+    env_file:
+      - ./backend/.env
